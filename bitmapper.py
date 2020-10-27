@@ -7,22 +7,27 @@ from PIL import Image
 @click.option('--show-output/--no-show-output', default=True, help='Show output image')
 @click.option('--invert/--no-invert', default=False, help='Invert output image')
 @click.option('--new_dim', default=False, help='change output dimentions')
+@click.option('--rot', default=False, help='rotate by')
 @click.argument('image_file')
-def convert(image_file, threshold, show_output, invert, new_dim):
+def convert(image_file, threshold, show_output, invert, new_dim, rot):
     """
     img2h will convert bitmaps to C/C++ headers with pixels represented
     as byte arrays.
     """
     im = Image.open(image_file)
-    width, height = im.size
-    columns = int(math.ceil(width / 8.0))
+    if rot:
+        im = im.rotate(int(rot))
     if new_dim:
-        new_width, new_height = [int(n) for n in new_dim.split()]
+        im = im.resize([int(n) for n in new_dim.split()])
+    im.show()
+
+    width, height = im.size
     width = int(width)
     height = int(height)
-    
+    columns = int(math.ceil(width / 8.0))
     name, ext = image_file.split('.')
     with open(name + '.h', 'w') as header:
+        name = 'pic'
         header.write(f"int bmpWidth = {width}, bmpHeight = {height};\n")
         header.write("static const unsigned char " + name + "[] = {\n")
 
@@ -35,7 +40,6 @@ def convert(image_file, threshold, show_output, invert, new_dim):
                     x = column * 8 + bit
                     char = "0"
                     if x < width:
-                        #print(im.getpixel((x, y)))
                         pixel = colorsys.rgb_to_hsv(*im.getpixel((x, y))[:3])
                         if pixel[2] < threshold:
                             char = "1"
