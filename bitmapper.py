@@ -11,7 +11,7 @@ from PIL import Image
 @click.option('--invert/--no-invert', default=False, help='Invert output image')
 @click.option('--resize', default=False, help='change output dimentions')
 @click.option('--rot', default=False, help='rotate by')
-@click.option('--qr', default=False, help='make "start-point" qr-code')
+@click.option('-qr', is_flag=True, help='make "start-point" qr-code')
 @click.argument('start_point')
 def convert(start_point, threshold, show_output, invert, resize, rot, qr):
     """
@@ -27,6 +27,7 @@ def convert(start_point, threshold, show_output, invert, resize, rot, qr):
         im = im.rotate(int(rot))
     if resize:
         im = im.resize([int(n) for n in resize.split()])
+    im = im.convert(mode="1", dither=Image.FLOYDSTEINBERG)
     im.show()
 
     width, height = im.size
