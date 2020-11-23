@@ -38,11 +38,12 @@ def convert(start_point, size, s, r, qr, h, ):
 def make_header(im: Image, img_file: Path, ):
     width, height = im.size
     im = ImageOps.invert(im.convert('L')).convert('1')
-    with img_file.with_name(f"{img_file.stem}.h").open('w') as header:
-        header.write(f"int bmpWidth = {width}, bmpHeight = {height};\n")
+    with img_file.with_name("img.h").open('a') as header:
+        header.write(f"int {img_file.stem}Width = {width}, {img_file.stem}Height = {height};\n")
         header.write(f"static const unsigned char {img_file.stem}[] = {{\n")
-        for b in im.tobytes():
+        for n, b in enumerate(im.tobytes(), 1):
             header.write(f"{b:#x}, ")
+            if not n%16: header.write('\n')
         header.write("};\n\n")
 
 
